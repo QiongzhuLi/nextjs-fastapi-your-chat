@@ -1,30 +1,16 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  rewrites: async () => {
-    return [
-      {
-        source: "/api/:path*",
-        destination:
-          process.env.NODE_ENV === "development"
-            ? "http://127.0.0.1:8000/api/:path*"
-            : "/api/",
-      },
-      {
-        source: "/docs",
-        destination:
-          process.env.NODE_ENV === "development"
-            ? "http://127.0.0.1:8000/docs"
-            : "/api/docs",
-      },
-      {
-        source: "/openapi.json",
-        destination:
-          process.env.NODE_ENV === "development"
-            ? "http://127.0.0.1:8000/openapi.json"
-            : "/api/openapi.json",
-      },
-    ];
-  },
-};
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
 
-module.exports = nextConfig;
+module.exports = withBundleAnalyzer({
+  webpack(config, { isServer }) {
+    if (!isServer) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        minSize: 20000,
+        maxSize: 240000,
+      };
+    }
+    return config;
+  },
+});
